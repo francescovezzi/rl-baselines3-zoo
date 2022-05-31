@@ -13,3 +13,8 @@ rl-trained_agents/
 htmlcov/
 git_rewrite_commit_history.sh
 .vscode/
+old_logs/
+retrained_logs/
+server_scripts/
+tensorlog/
+
