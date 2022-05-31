@@ -132,6 +132,7 @@ if __name__ == "__main__":  # noqa: C901
     )
     parser.add_argument("--wandb-project-name", type=str, default="sb3", help="the wandb's project name")
     parser.add_argument("--wandb-entity", type=str, default=None, help="the entity (team) of wandb's project")
+    parser.add_argument("--curriculum", action="store_true", default=False, help="Enable curriculum duirng learning")
     args = parser.parse_args()
 
     # Going through custom gym packages to let them register in the global registory
@@ -224,6 +225,7 @@ if __name__ == "__main__":  # noqa: C901
         vec_env_type=args.vec_env,
         n_eval_envs=args.n_eval_envs,
         no_optim_plots=args.no_optim_plots,
+        curriculum=args.curriculum,
         device=args.device,
     )
 

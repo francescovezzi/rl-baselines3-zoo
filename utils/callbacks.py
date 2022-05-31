@@ -227,3 +227,72 @@ class RawStatisticsCallback(BaseCallback):
                 self._tensorboard_writer.write(logger_dict, exclude_dict, self._timesteps_counter)
 
         return True
+
+
+class CurriculumEvalCallback(EvalCallback):
+    """
+    Callback used for evaluating and increase curriculum learning level.
+    """
+
+    def __init__(
+        self,
+        eval_env: VecEnv,
+        callback_on_new_best: Optional[BaseCallback] = None,
+        callback_after_eval: Optional[BaseCallback] = None,
+        n_eval_episodes: int = 5,
+        eval_freq: int = 10000,
+        log_path: Optional[str] = None,
+        best_model_save_path: Optional[str] = None,
+        deterministic: bool = True,
+        render: bool = False,
+        verbose: int = 1,
+        warn: bool = True,
+    ):
+        super().__init__(
+            eval_env=eval_env,
+            callback_on_new_best=callback_on_new_best,
+            callback_after_eval=callback_after_eval,
+            n_eval_episodes=n_eval_episodes,
+            eval_freq=eval_freq,
+            deterministic=deterministic,
+            verbose=verbose,
+            best_model_save_path=best_model_save_path,
+            log_path=log_path,
+            render=render,
+            warn=warn,
+        )
+        self.curriculum_history_file = os.path.join(best_model_save_path, "curriculum_history.txt")
+        self.reward_threshold = 0.75
+        self.reward_threshold = -20
+        self.level_step = 0.05
+
+    def _init_callback(self) -> None:
+        super()._init_callback()
+        self.training_env.env_method("print_curriculum_info", indices=0)
+        self._update_curriculum_history()
+
+    def _on_step(self) -> bool:
+        
+        continue_training = True
+        
+        if self.eval_freq > 0 and self.n_calls % self.eval_freq == 0:
+            continue_training = super()._on_step()
+            if self.last_mean_reward > self.reward_threshold:
+                try:
+                    self.training_env.env_method(
+                        "increase_curriculum_level", self.level_step, indices=range(self.training_env.num_envs)
+                    )
+                    self.eval_env.env_method(
+                        "increase_curriculum_level", self.level_step, indices=range(self.eval_env.num_envs)
+                    )
+                    self.training_env.env_method("print_curriculum_info", indices=0)
+                except AttributeError:
+                    raise AttributeError("Environment doesn't support curriculum learning.")
+                self._update_curriculum_history()
+        return continue_training
+
+    def _update_curriculum_history(self):
+        curriculum_level = self.training_env.env_method("get_curriculum_level", indices=0)[0]
+        with open(self.curriculum_history_file, "a") as f:
+            s = f"num_timesteps={self.num_timesteps} || curriculum_level={curriculum_level:.3f}\n"
+            f.write(s)

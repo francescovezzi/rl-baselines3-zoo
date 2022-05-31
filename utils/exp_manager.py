@@ -44,7 +44,7 @@ from torch import nn as nn  # noqa: F401
 
 # Register custom envs
 import utils.import_envs  # noqa: F401 pytype: disable=import-error
-from utils.callbacks import SaveVecNormalizeCallback, TrialEvalCallback
+from utils.callbacks import CurriculumEvalCallback, SaveVecNormalizeCallback, TrialEvalCallback
 from utils.hyperparams_opt import HYPERPARAMS_SAMPLER
 from utils.utils import ALGOS, get_callback_list, get_latest_run_id, get_wrapper_class, linear_schedule
 
@@ -91,6 +91,7 @@ class ExperimentManager:
         vec_env_type: str = "dummy",
         n_eval_envs: int = 1,
         no_optim_plots: bool = False,
+        curriculum: bool = False,
         device: Union[th.device, str] = "auto",
     ):
         super().__init__()
@@ -145,6 +146,7 @@ class ExperimentManager:
         self.n_startup_trials = n_startup_trials
         self.n_evaluations = n_evaluations
         self.deterministic_eval = not self.is_atari(self.env_id)
+        self.curriculum = curriculum
         self.device = device
 
         # Logging
@@ -449,16 +451,27 @@ class ExperimentManager:
                 print("Creating test environment")
 
             save_vec_normalize = SaveVecNormalizeCallback(save_freq=1, save_path=self.params_path)
-            eval_callback = EvalCallback(
-                self.create_envs(self.n_eval_envs, eval_env=True),
-                callback_on_new_best=save_vec_normalize,
-                best_model_save_path=self.save_path,
-                n_eval_episodes=self.n_eval_episodes,
-                log_path=self.save_path,
-                eval_freq=self.eval_freq,
-                deterministic=self.deterministic_eval,
+            eval_callback_kwargs = {
+                "eval_env": self.create_envs(self.n_eval_envs, eval_env=True),
+                "callback_on_new_best": save_vec_normalize,
+                "best_model_save_path": self.save_path,
+                "n_eval_episodes": self.n_eval_episodes,
+                "log_path": self.save_path,
+                "eval_freq": self.eval_freq,
+                "deterministic": self.deterministic_eval,
+            }
+            eval_callback = (
+                CurriculumEvalCallback(**eval_callback_kwargs) if self.curriculum else EvalCallback(**eval_callback_kwargs)
             )
-
+            # eval_callback = EvalCallback(
+            #     self.create_envs(self.n_eval_envs, eval_env=True),
+            #     callback_on_new_best=save_vec_normalize,
+            #     best_model_save_path=self.save_path,
+            #     n_eval_episodes=self.n_eval_episodes,
+            #     log_path=self.save_path,
+            #     eval_freq=self.eval_freq,
+            #     deterministic=self.deterministic_eval,
+            # )
             self.callbacks.append(eval_callback)
 
     @staticmethod
