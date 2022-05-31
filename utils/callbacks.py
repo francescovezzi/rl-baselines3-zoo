@@ -272,9 +272,9 @@ class CurriculumEvalCallback(EvalCallback):
         self._update_curriculum_history()
 
     def _on_step(self) -> bool:
-        
+
         continue_training = True
-        
+
         if self.eval_freq > 0 and self.n_calls % self.eval_freq == 0:
             continue_training = super()._on_step()
             if self.last_mean_reward > self.reward_threshold:
