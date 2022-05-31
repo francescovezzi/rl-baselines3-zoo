@@ -60,7 +60,9 @@ def main():  # noqa: C901
     parser.add_argument(
         "--env-kwargs", type=str, nargs="+", action=StoreDict, help="Optional keyword argument to pass to the env constructor"
     )
-    parser.add_argument("--last-curriculum", action="store_true", default=False, help="Use the last curriculum level achieved in learning")
+    parser.add_argument(
+        "--last-curriculum", action="store_true", default=False, help="Use the last curriculum level achieved in learning"
+    )
     args = parser.parse_args()
 
     # Going through custom gym packages to let them register in the global registory
