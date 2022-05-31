@@ -417,3 +417,34 @@ def get_model_path(
         raise ValueError(f"No model found for {algo} on {env_id}, path: {model_path}")
 
     return name_prefix, model_path, log_path
+
+
+def _get_last_curriculum_level(text_file):
+    """Get the last curriculum level in curriculum_history.txt file."""
+    with open(text_file, "r") as f:
+        last_line = f.readlines()[-1]
+        curr_level = last_line.split("=")[-1]
+    return float(curr_level)
+
+
+def get_last_curriculum_level(log_path):
+    curriculum_history = os.path.join(log_path, "curriculum_history.txt")
+    if os.path.isfile(curriculum_history):
+        return _get_last_curriculum_level(curriculum_history)
+    else:
+        print("** FYI: curriculum history not found. **")
+        return None
+
+
+def use_last_curriculum(log_path):
+
+    curr_level = get_last_curriculum_level(log_path)
+    curr_item = {}
+
+    if curr_level is None:
+        print("curriculum level not updated")
+    else:
+        curr_item["curriculum_level"] = curr_level
+        print(f"curriculum level overwritten with the last one present in the curriculum history: {curr_level}")
+
+    return curr_item

@@ -11,7 +11,7 @@ from stable_baselines3.common.utils import set_random_seed
 import utils.import_envs  # noqa: F401 pylint: disable=unused-import
 from utils import ALGOS, create_test_env, get_saved_hyperparams
 from utils.exp_manager import ExperimentManager
-from utils.utils import StoreDict, get_model_path
+from utils.utils import StoreDict, get_model_path, use_last_curriculum
 
 
 def main():  # noqa: C901
@@ -59,6 +59,9 @@ def main():  # noqa: C901
     )
     parser.add_argument(
         "--env-kwargs", type=str, nargs="+", action=StoreDict, help="Optional keyword argument to pass to the env constructor"
+    )
+    parser.add_argument(
+        "--last-curriculum", action="store_true", default=False, help="Use the last curriculum level achieved in learning"
     )
     args = parser.parse_args()
 
@@ -111,6 +114,8 @@ def main():  # noqa: C901
     # overwrite with command line arguments
     if args.env_kwargs is not None:
         env_kwargs.update(args.env_kwargs)
+    if args.last_curriculum:
+        env_kwargs.update(use_last_curriculum(log_path))
 
     log_dir = args.reward_log if args.reward_log != "" else None
 
