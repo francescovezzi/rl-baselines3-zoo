@@ -18,3 +18,7 @@ runs
 hub
 *.mp4
 *.json
+old_logs/
+retrained_logs/
+server_scripts/
+tensorlog/
