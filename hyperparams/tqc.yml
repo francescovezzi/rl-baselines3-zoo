@@ -276,6 +276,17 @@ CarRacing-v0:
 A1Walking-v0:
   <<: *pybullet-defaults
 
+<<<<<<< HEAD
+
+QuadrupedSpring-v0:
+  <<: *pybullet-defaults
+  # normalize: True
+  normalize: "{'norm_obs': True, 'norm_reward': False}"
+  n_timesteps: !!float 1e6
+  n_envs: 2
+  gamma: 0.99
+  # use_sde: False
+=======
 RocketLander-v0:
   n_timesteps: !!float 3e6
   policy: 'MlpPolicy'
@@ -284,3 +295,4 @@ RocketLander-v0:
         skip: 4
     - utils.wrappers.HistoryWrapper:
         horizon: 2
+>>>>>>> feat/yaml_api

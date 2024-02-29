@@ -1,0 +1,47 @@
+!!python/object/apply:collections.OrderedDict
+- - - algo
+    - ars
+  - - ars_n_eval_episodes
+    - 3
+  - - curriculum
+    - false
+  - - env
+    - QuadrupedSpring-v0
+  - - env_kwargs
+    - action_repeat: 10
+      action_space_mode: SYMMETRIC
+      curriculum_level: 0.0
+      enable_action_filter: true
+      enable_action_interpolation: false
+      enable_springs: true
+      env_randomizer_mode: GROUND_RANDOMIZER
+      motor_control_mode: PD
+      observation_space_mode: ARS_BASIC
+      task_env: CONTINUOUS_JUMPING_FORWARD3
+  - - eval_episodes
+    - 1
+  - - eval_freq
+    - 5000000
+  - - hyperparams
+    - delta_std: 0.025
+      env_wrapper:
+      - quadruped_spring.env.wrappers.landing_wrapper_continuous2.LandingWrapperContinuous2
+      - quadruped_spring.env.wrappers.obs_flattening_wrapper.ObsFlatteningWrapper
+      learning_rate: 0.03
+      n_delta: 1
+      n_envs: 1
+      n_top: 1
+      policy: MlpPolicy
+      policy_kwargs: dict(net_arch=[64],activation_fn=nn.Tanh)
+  - - log_folder
+    - logs
+  - - log_interval
+    - 10
+  - - n_eval_envs
+    - 1
+  - - save_freq
+    - 5000000
+  - - tensorboard_log
+    - tensorlog
+  - - uuid
+    - false

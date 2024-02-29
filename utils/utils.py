@@ -9,7 +9,7 @@ import gym
 import stable_baselines3 as sb3  # noqa: F401
 import torch as th  # noqa: F401
 import yaml
-from huggingface_hub import HfApi
+# from huggingface_hub import HfApi
 from sb3_contrib import ARS, QRDQN, TQC, TRPO, RecurrentPPO
 from stable_baselines3 import A2C, DDPG, DQN, PPO, SAC, TD3
 from stable_baselines3.common.callbacks import BaseCallback
@@ -329,8 +329,13 @@ def get_latest_run_id(log_path: str, env_id: str) -> int:
     for path in glob.glob(os.path.join(log_path, env_id + "_[0-9]*")):
         file_name = os.path.basename(path)
         ext = file_name.split("_")[-1]
-        if env_id == "_".join(file_name.split("_")[:-1]) and ext.isdigit() and int(ext) > max_run_id:
-            max_run_id = int(ext)
+        if ext.isdigit():
+            if env_id == "_".join(file_name.split("_")[:-1]) and ext.isdigit() and int(ext) > max_run_id:
+                max_run_id = int(ext)
+        else:
+            ext = file_name.split("_")[-2]
+            if env_id == "_".join(file_name.split("_")[:-2]) and ext.isdigit() and int(ext) > max_run_id:
+                max_run_id = int(ext)
     return max_run_id
 
 
@@ -369,6 +374,67 @@ def get_saved_hyperparams(
                 normalize_kwargs = {"norm_obs": hyperparams["normalize"], "norm_reward": norm_reward}
             hyperparams["normalize_kwargs"] = normalize_kwargs
     return hyperparams, stats_path
+
+
+def update_args_from_custom_yaml(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
+    """Update args with the arguments taken from the custom yaml file."""
+    des_dict = _get_desired_dict(args)
+    if _check_des_dict(parser, des_dict):
+        _update_args(args, des_dict)
+    else:
+        raise RuntimeError(f"unable to upload args from {args.yaml_file}")
+
+
+def _get_desired_dict(args: argparse.Namespace) -> dict:
+    """Returns the dictionary from the custom yaml file."""
+    args_path = args.yaml_file
+    train_args = args.__dict__.keys()
+    new_args = {}
+    if os.path.isfile(args_path):
+        with open(args_path) as f:
+            loaded_args = yaml.load(f, Loader=yaml.UnsafeLoader)  # pytype: disable=module-attr
+        for k, v in loaded_args.items():
+            if k in train_args:
+                new_args[k] = v
+            else:
+                print(f"WARNING: key argument {k} not supported yet for being uploaded by custom yaml file.")
+    else:
+        raise RuntimeError(f"{args_path} file not found.")
+    return new_args
+
+
+def _check_des_dict(parser: argparse.ArgumentParser, des_dict: dict) -> bool:
+    """
+    Returns a boolean specifying if the desired dict values are consistent
+    with the ones specified in the parse.
+    """
+    check_value = True
+    relevant_actions = [a for a in parser._actions if a.dest in des_dict.keys()]
+    for action in relevant_actions:
+        value = des_dict[action.dest]
+        if value is not None:
+            if isinstance(action, StoreDict):
+                check_value = type(value) == dict
+            elif isinstance(action, argparse._StoreTrueAction):
+                check_value = type(value) == bool
+            else:
+                check_value = type(value) == action.type
+                parser._check_value(action, value)
+        if not (check_value):
+            print(f"unable to upload the value for {action.dest} arg.")
+            return check_value
+    return check_value
+
+
+def _update_args(args: argparse.Namespace, new_args: dict) -> None:
+    """Update the args in according to the new desired args."""
+    for k in new_args.keys():
+        old_arg = getattr(args, k)
+        new_arg = new_args[k]
+        if isinstance(old_arg, dict):
+            old_arg.update(new_arg)
+        else:
+            setattr(args, k, new_arg)
 
 
 class StoreDict(argparse.Action):
@@ -442,3 +508,34 @@ def get_model_path(
         raise ValueError(f"No model found for {algo} on {env_id}, path: {model_path}")
 
     return name_prefix, model_path, log_path
+
+
+def _get_last_curriculum_level(text_file):
+    """Get the last curriculum level in curriculum_history.txt file."""
+    with open(text_file, "r") as f:
+        last_line = f.readlines()[-1]
+        curr_level = last_line.split("=")[-1]
+    return float(curr_level)
+
+
+def get_last_curriculum_level(log_path):
+    curriculum_history = os.path.join(log_path, "curriculum_history.txt")
+    if os.path.isfile(curriculum_history):
+        return _get_last_curriculum_level(curriculum_history)
+    else:
+        print("** FYI: curriculum history not found. **")
+        return None
+
+
+def use_last_curriculum(log_path):
+
+    curr_level = get_last_curriculum_level(log_path)
+    curr_item = {}
+
+    if curr_level is None:
+        print("curriculum level not updated")
+    else:
+        curr_item["curriculum_level"] = curr_level
+        print(f"curriculum level overwritten with the last one present in the curriculum history: {curr_level}")
+
+    return curr_item
