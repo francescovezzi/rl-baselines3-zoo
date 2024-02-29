@@ -22,3 +22,4 @@ old_logs/
 retrained_logs/
 server_scripts/
 tensorlog/
+yaml_training/train_env_kwargs

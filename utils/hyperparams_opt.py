@@ -30,9 +30,9 @@ def sample_ppo_params(trial: optuna.Trial) -> Dict[str, Any]:
     vf_coef = trial.suggest_uniform("vf_coef", 0, 1)
     net_arch = trial.suggest_categorical("net_arch", ["small", "medium"])
     # Uncomment for gSDE (continuous actions)
-    # log_std_init = trial.suggest_uniform("log_std_init", -4, 1)
+    log_std_init = trial.suggest_uniform("log_std_init", -4, 1)
     # Uncomment for gSDE (continuous action)
-    # sde_sample_freq = trial.suggest_categorical("sde_sample_freq", [-1, 8, 16, 32, 64, 128, 256])
+    sde_sample_freq = trial.suggest_categorical("sde_sample_freq", [-1, 8, 16, 32, 64, 128, 256])
     # Orthogonal initialization
     ortho_init = False
     # ortho_init = trial.suggest_categorical('ortho_init', [False, True])
@@ -48,9 +48,13 @@ def sample_ppo_params(trial: optuna.Trial) -> Dict[str, Any]:
 
     # Independent networks usually work best
     # when not working with images
+    # net_arch = {
+    #     "small": [dict(pi=[64, 64], vf=[64, 64])],
+    #     "medium": [dict(pi=[256, 256], vf=[256, 256])],
+    # }[net_arch]
     net_arch = {
-        "small": [dict(pi=[64, 64], vf=[64, 64])],
-        "medium": [dict(pi=[256, 256], vf=[256, 256])],
+        "small": [dict(pi=[32, 32], vf=[32, 32])],
+        "medium": [dict(pi=[64, 64], vf=[64, 64])],
     }[net_arch]
 
     activation_fn = {"tanh": nn.Tanh, "relu": nn.ReLU, "elu": nn.ELU, "leaky_relu": nn.LeakyReLU}[activation_fn]
@@ -495,16 +499,20 @@ def sample_ars_params(trial: optuna.Trial) -> Dict[str, Any]:
     zero_policy = trial.suggest_categorical("zero_policy", [True, False])
     n_top = max(int(top_frac_size * n_delta), 1)
 
-    # net_arch = trial.suggest_categorical("net_arch", ["linear", "tiny", "small"])
+    nets = ['linear', 'super tiny', 'tiny', 'small', 'medium', 'large']
+    net_arch = trial.suggest_categorical("net_arch", nets)
 
     # Note: remove bias to be as the original linear policy
     # and do not squash output
     # Comment out when doing hyperparams search with linear policy only
-    # net_arch = {
-    #     "linear": [],
-    #     "tiny": [16],
-    #     "small": [32],
-    # }[net_arch]
+    net_arch = {
+        nets[0]: [],
+        nets[1]: [16],
+        nets[2]: [32],
+        nets[3]: [16, 16],
+        nets[4]: [32, 16],
+        nets[5]: [32, 32],
+    }[net_arch]
 
     # TODO: optimize the alive_bonus_offset too
 
@@ -515,7 +523,7 @@ def sample_ars_params(trial: optuna.Trial) -> Dict[str, Any]:
         "delta_std": delta_std,
         "n_top": n_top,
         "zero_policy": zero_policy,
-        # "policy_kwargs": dict(net_arch=net_arch),
+        "policy_kwargs": dict(net_arch=net_arch),
     }
 
 

@@ -14,7 +14,7 @@ from stable_baselines3.common.utils import set_random_seed
 # Register custom envs
 import utils.import_envs  # noqa: F401 pytype: disable=import-error
 from utils.exp_manager import ExperimentManager
-from utils.utils import ALGOS, StoreDict
+from utils.utils import ALGOS, StoreDict, update_args_from_custom_yaml
 
 seaborn.set()
 
@@ -132,7 +132,15 @@ if __name__ == "__main__":  # noqa: C901
     )
     parser.add_argument("--wandb-project-name", type=str, default="sb3", help="the wandb's project name")
     parser.add_argument("--wandb-entity", type=str, default=None, help="the entity (team) of wandb's project")
+    parser.add_argument("--curriculum", action="store_true", default=False, help="Enable curriculum duirng learning")
+    parser.add_argument("--yaml-file", type=str, default=None, help="the yaml file for updating script args")
+    parser.add_argument("--ars-n-eval-episodes", type=int, default=None, help="number of episodes agent is evaluated with ARS")
+
     args = parser.parse_args()
+
+    # Update custom args with the custom yaml file ones if provided
+    if args.yaml_file:
+        update_args_from_custom_yaml(parser, args)
 
     # Going through custom gym packages to let them register in the global registory
     for env_module in args.gym_packages:
@@ -224,7 +232,9 @@ if __name__ == "__main__":  # noqa: C901
         vec_env_type=args.vec_env,
         n_eval_envs=args.n_eval_envs,
         no_optim_plots=args.no_optim_plots,
+        curriculum=args.curriculum,
         device=args.device,
+        ars_eval_episodes=args.ars_n_eval_episodes,
     )
 
     # Prepare experiment and launch hyperparameter optimization if needed

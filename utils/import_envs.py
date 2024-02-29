@@ -39,10 +39,9 @@ except ImportError:
     panda_gym = None
 
 try:
-    import rocket_lander_gym  # pytype: disable=import-error
+    import quadruped_spring  # pytype: disable=import-error
 except ImportError:
-    rocket_lander_gym = None
-
+    quadruped_spring = None
 
 # Register no vel envs
 def create_no_vel_env(env_id: str):
@@ -60,3 +59,4 @@ for env_id in MaskVelocityWrapper.velocity_indices.keys():
         id=f"{name}NoVel-v{version}",
         entry_point=create_no_vel_env(env_id),
     )
+

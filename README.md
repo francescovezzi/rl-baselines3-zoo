@@ -59,6 +59,18 @@ python train.py --algo sac --env Pendulum-v1 --save-replay-buffer
 ```
 It will be automatically loaded if present when continuing training.
 
+## YAML support
+
+Now is possible to train an agent by specifying all the possible parameters through a yaml file avoid to big and complex command lines with a simple command:
+```
+python train.py --yaml-file path/to/file.yaml
+```
+To produce a bunch of yaml files:
+```
+python yaml_training/generate_yaml_{generator}.py
+```
+There are several yaml generator since according to the algorithm and task the hyperparameters are different.
+
 ## Plot Scripts
 
 Plot scripts (to be documented, see "Results" sections in SB3 documentation):
