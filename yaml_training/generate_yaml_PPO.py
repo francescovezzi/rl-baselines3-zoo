@@ -43,16 +43,6 @@ def generate_architectures(list_1, list_2):
 def get_agent_path_id(s):
     return (s.split('/')[-2])[-1]
 
-
-##############################
-# Local Laptop variables
-##############################
-LOCAL_LAPTOP = False
-LOCAL_EXPERT_FOLDER = '/home/francesco/uni/tesi/quadruped_spring/quadruped_spring/'
-if LOCAL_LAPTOP:
-    print('WARNING::\nlocal laptop settings.')
-
-
 ##########################
 # Parameters for training
 ##########################
@@ -98,7 +88,6 @@ ENV_RANDOMIZER_MODE = ['GROUND_RANDOMIZER']
 CURRICULUM = 0.0
 # AUX_SEED = rng.randint(0, 2**32 - 1)
 
-
 ########################################
 # wrappers
 ########################################
@@ -108,18 +97,13 @@ ENABLE_GO_TO_REST = False
 ENABLE_MASTER_WRAPPER = False
 ENABLE_DEMO_WRAPPER = False
 
-LOGS_FOLDER = '/home/fvezzi/thesis/quadruped_spring/quadruped_spring/'
-if LOCAL_LAPTOP:
-    LOGS_FOLDER = LOCAL_EXPERT_FOLDER
-
-
 ########################################
-# path
+# retrain agent path
 ########################################
-PATH = 'DLWS-scripts/train_env_kwargs'
-FOLDER = 'logs/logs_continuous_jf'
+PATH = 'yaml_training/train_env_kwargs'
+FOLDER = 'logs'
 MODEL = 'best_model.zip'
-AGENT_PATH = [os.path.join('logs_ppo', 'to_retrain_single_jf')]
+AGENT_PATH = ["agents to be retrained path"]
 
 ########################################
 # flags

@@ -43,32 +43,36 @@ def generate_architectures(list_1, list_2):
 def get_agent_path_id(s):
     return (s.split('/')[-2])[-1]
 
-
-##############################
-# Local Laptop variables
-##############################
-LOCAL_LAPTOP = False
-LOCAL_EXPERT_FOLDER = '/home/francesco/uni/tesi/quadruped_spring/quadruped_spring/'
-if LOCAL_LAPTOP:
-    print('WARNING::\nlocal laptop settings.')
-
-
 ##########################
 # Parameters for training
 ##########################
+# ALGO = 'ppo'
+# ENV = 'QuadrupedSpring-v0'
+# N_ENVS = 16
+# N_EVAL_ENVS = 4
+# SAVE_FREQ = 500_000
+# EVAL_FREQ = 500_000
+# LOG_INTERVAL = 10
+# EVAL_EPISODES = 10
+# N_STEPS = 256
+# N_STEP = 10_000_000
+# CLIP_RANGE = 0.2
+# LEARNING_RATE = 0.0002
+# BATCH_SIZE = 128  # Default -> 64
+
 ALGO = 'ppo'
 ENV = 'QuadrupedSpring-v0'
-N_ENVS = 16
-N_EVAL_ENVS = 4
-SAVE_FREQ = 500_000
-EVAL_FREQ = 500_000
+N_ENVS = 1
+N_EVAL_ENVS = 1
+SAVE_FREQ = 500
+EVAL_FREQ = 500
 LOG_INTERVAL = 10
 EVAL_EPISODES = 10
-N_STEPS = 256
-N_STEP = 10_000_000
+N_STEPS = 128
+N_STEP = 2000
 CLIP_RANGE = 0.2
 LEARNING_RATE = 0.0002
-BATCH_SIZE = 128  # Default -> 64
+BATCH_SIZE = 64  # Default -> 64
 
 # ACTIVATION_FNS = ['activation_fn=nn.ReLU)', 'activation_fn=nn.Tanh)']
 ACTIVATION_FNS = ['activation_fn=nn.Tanh)']
@@ -93,7 +97,6 @@ ENV_RANDOMIZER_MODE = ['GROUND_RANDOMIZER']
 CURRICULUM = 0.0
 # AUX_SEED = rng.randint(0, 2**32 - 1)
 
-
 ########################################
 # wrappers
 ########################################
@@ -103,19 +106,13 @@ ENABLE_GO_TO_REST = True
 ENABLE_MASTER_WRAPPER = False
 ENABLE_DEMO_WRAPPER = False
 
-LOGS_FOLDER = '/home/fvezzi/thesis/quadruped_spring/quadruped_spring/'
-if LOCAL_LAPTOP:
-    LOGS_FOLDER = LOCAL_EXPERT_FOLDER
-
-
 ########################################
-# path
+# retrain agent path
 ########################################
-PATH = 'DLWS-scripts/train_env_kwargs'
-FOLDER = 'logs/log_backflip'
+PATH = 'yaml_training/train_env_kwargs'
+FOLDER = 'logs'
 MODEL = 'best_model.zip'
-AGENT_PATH = [os.path.join('logs_ppo', 'to_retrain_backflip')]
-
+AGENT_PATH = ["agents to be retrained path"]
 
 ########################################
 # flags
@@ -130,7 +127,7 @@ if __name__ == '__main__':
     os.makedirs(PATH, exist_ok=True)
     
     if REMOVE_PREVIOUS_ARGS:
-        for file in glob.glob(os.path.join(PATH, '*')):
+        for file in glob.glob(os.path.join(ENV, PATH, '*')):
             os.remove(file)
         last_id = 0
     else:
