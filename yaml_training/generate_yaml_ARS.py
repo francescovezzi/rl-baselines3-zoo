@@ -43,29 +43,19 @@ def list_fusion(list_1, list_2):
 ##########################
 ALGO = 'ars'
 ENV = 'QuadrupedSpring-v0'
-# N_ENVS = 40
-# N_EVAL_ENVS = 4
-# N_ENVS = 10
-# N_EVAL_ENVS = 1
-# SAVE_FREQ = 5_000_000
-# EVAL_FREQ = 5_000_000
-# LOG_INTERVAL = 10
-# EVAL_EPISODES = 4
-# N_DELTA = 60
-# N_TOP = 30
-# LEARNING_RATE = 0.03
-# DELTA_STD = 0.025
-
-N_ENVS = 1
+N_ENVS = 40
+N_EVAL_ENVS = 4
+N_ENVS = 10
 N_EVAL_ENVS = 1
 SAVE_FREQ = 5_000_000
 EVAL_FREQ = 5_000_000
 LOG_INTERVAL = 10
-EVAL_EPISODES = 1
-N_DELTA = 1
-N_TOP = 1
+EVAL_EPISODES = 4
+N_DELTA = 60
+N_TOP = 30
 LEARNING_RATE = 0.03
 DELTA_STD = 0.025
+N_STEP = 75_000_000
 
 # POLICIES = ['LinearPolicy']#, 'MlpPolicy']
 POLICIES = ['MlpPolicy']
@@ -143,7 +133,7 @@ if __name__ == '__main__':
 
     training_args = {'algo': ALGO,
                     'env': ENV,
-                    # '-n': N_STEP,
+                    '-n': N_STEP,
                     'eval_freq': EVAL_FREQ,
                     'save_freq': SAVE_FREQ,
                     'eval_episodes': EVAL_EPISODES,
